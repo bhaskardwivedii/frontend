@@ -1,9 +1,15 @@
 import React, { useState, useEffect } from "react";
 import Web3 from "web3";
-import Insurance from "./contracts/Insurance.json";  // Import contract ABI
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Insurance from "./contracts/Insurance.json"; // Import contract ABI
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'; 
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import Dash from './components/dash';  // Import the Dash component
+import AboutUs from './components/AboutUs'; // Import the AboutUs component
+import PolicyClaimForm from './components/PolicyClaimForm'; // Import the PolicyClaimForm component
+import IntroductionPage from './components/IntroductionPage'; // Intro Page
+import LoginPage from './components/LoginPage'; // Login Page
+import ClaimsTracker from './components/ClaimsTracker'; // Import the Claims Tracker component
+import PolicyRecommendations from './components/PolicyRecommendations'; // Adjust the path as necessary
+import SupportUs from './components/SupportUs'; // Adjust the path as necessary
 
 const theme = createTheme();
 
@@ -39,6 +45,8 @@ function App() {
         } catch (error) {
           console.error("Error connecting to MetaMask", error);
         }
+      } else {
+        alert("Please install MetaMask to use this application.");
       }
     }
     loadWeb3();
@@ -47,41 +55,37 @@ function App() {
   const createPolicy = async (premium, coverageAmount) => {
     try {
       await insurance.methods.createPolicy(premium, coverageAmount).send({ from: account, value: premium });
-      alert("Policy Created Successfully");
+      alert("Policy Claimed Successfully");
     } catch (err) {
       console.error(err);
-      alert("Failed to create policy.");
+      alert("Failed to claim policy.");
     }
   };
 
   return (
     <ThemeProvider theme={theme}>
       <Router>
-        <div>
-          <h1>BlockSure Innovations</h1>
-          <p>Connected Account: {account}</p>
-          <p>Contract Address: {contractAddress}</p>
-          
-          {/* Add forms and buttons for UI interaction */}
-
-          <form onSubmit={(e) => {
-            e.preventDefault();
-            const premium = e.target.premium.value;
-            const coverageAmount = e.target.coverageAmount.value;
-            createPolicy(premium, coverageAmount);
-          }}>
-            <label>Premium (in Wei): </label>
-            <input type="number" name="premium" required />
-            <br />
-            <label>Coverage Amount: </label>
-            <input type="number" name="coverageAmount" required />
-            <br />
-            <button type="submit">Claim Policy</button>
-          </form>
-
-          {/* Add the Dash component */}
-          <Dash />
-        </div>
+        {/* Routes for navigation */}
+        <Routes>
+          {/* Introduction Page with Login/Signup */}
+          <Route path="/" element={<IntroductionPage />} />
+          {/* Login Page */}
+          <Route path="/login" element={<LoginPage />} />
+          {/* Policy Claim Form Page - only shown after login */}
+          <Route path="/policy-claim" element={<PolicyClaimForm createPolicy={createPolicy} account={account} contractAddress={contractAddress} />} />
+          {/* Claims Tracker Page */}
+          <Route path="/claims-tracker" element={<ClaimsTracker />} /> {/* New route for Claims Tracker */}
+        </Routes>
+        <Routes>
+        {/* Other routes */}
+        <Route path="/policy-recommendations" element={<PolicyRecommendations />} />
+      </Routes>
+      <Routes>
+        {/* Other routes */}
+        <Route path="/support" element={<SupportUs />} />
+      </Routes>
+        {/* About Us section can remain in the App component if needed */}
+        {/* <AboutUs /> */}
       </Router>
     </ThemeProvider>
   );
